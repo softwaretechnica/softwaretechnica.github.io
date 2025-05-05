@@ -1,0 +1,131 @@
+<p># </p>
+<p><a href="#summary"><strong>Summary    1</strong></a></p>
+<p><a href="#trust-models"><strong>Trust models    1</strong></a></p>
+<p><a href="#single-ca-trust-model-\(c\">Single CA Trust Model    1</a>)</p>
+<p><a href="#hierarchical-trust-model-\(htm\">Hierarchical Trust Model (HTM)    2</a>)</p>
+<p><a href="#mesh-trust-model-\(mtm\">Mesh Trust Model (MTM)    3</a>)</p>
+<p><a href="#bridge-trust-model-\(btm\">Bridge Trust Model (BTM)    5</a>)</p>
+<p><a href="#hybrid-pki-model">Hybrid Pki Model    5</a></p>
+<p># </p>
+<p># </p>
+<h1 id="summary-summary-">Summary {#summary}</h1>
+<p>This document is a summary of my perspective on establishing the trust models with PKI.</p>
+<h1 id="trust-models-trust-models-">Trust models {#trust-models}</h1>
+<h2 id="overview">Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>Trust Model</th>
+<th>Complexity Level</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Single CA Trust Model (SCaTM)</td>
+<td>Very Low</td>
+<td>One CA issues all certificates; easy to set up and manage.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Direct Trust (DTM)</td>
+<td>Low</td>
+<td>Trust is configured manually between entities (e.g., pinned certs, self-signed certs).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Web of Trust (WoT)</td>
+<td>Moderate</td>
+<td>Decentralized trust built by users signing each other&#39;s keys; complex to evaluate trust paths.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Hierarchical Trust Model (HTM)</td>
+<td>Moderate–High</td>
+<td>Root CA issues to intermediates → end-entities; scalable and widely used.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Mesh Trust Model (MTM)</td>
+<td>High</td>
+<td>Multiple CAs trust each other directly; harder to manage at scale.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Bridge Trust Model (BTM)</td>
+<td>Very High</td>
+<td>Links multiple PKI hierarchies via a bridge CA; complex cross-certification logic.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Hybrid PKI Model</td>
+<td>Variable–Very High</td>
+<td>Combines elements of multiple models; highest complexity depending on implementation.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="single-ca-trust-model-c-single-ca-trust-model-c-">Single CA Trust Model (c) {#single-ca-trust-model-(c)}</h2>
+<p>This is the simplest trust model, where all the end users trust a single CA server. The CA is signing all the end user certificates. </p>
+<p>The benefit with this model - it&#39;s the simplest one and simplest one to deploy.</p>
+<p>The downsides of this model are:</p>
+<ol>
+<li>It&#39;s not suitable for large organizations, represented by a diverse and large community of users.   </li>
+<li>If the CA’s public key changes, then the entire system needs to be reconfigured.</li>
+</ol>
+<h2 id="direct-trust-model-dtm-">Direct trust model (DTM)</h2>
+<p>In the Direct Trust Model, trust is explicitly and manually configured between parties. There is no CA hierarchy or intermediate validation path. A user or system directly trusts a specific certificate or public key, often by preloading or pinning it.</p>
+<ul>
+<li><strong>Structure</strong>: One-to-one trust relationship between parties<br><strong>Trust basis</strong>: Manual configuration or implicit trust in known certificates or keys<br><strong>Example</strong>: Self-signed certificates in internal systems, pinned public keys in IoT devices</li>
+</ul>
+<p>All validations begin with a predefined trusted certificate or key that the application accepts as authoritative. There is no external validation or delegation involved.</p>
+<p>This model is widely used in small-scale systems, closed environments, or embedded systems, where trust relationships are static and manually controlled. It is simple and secure when the number of parties is small, but does not scale well and requires manual key distribution and rotation.</p>
+<p>It is easy to implement, has no single point of failure, but becomes unmanageable in large, dynamic environments.</p>
+<h2 id="web-of-trust-wot-">Web of Trust (WoT)</h2>
+<p>A decentralized trust model where users or entities validate each other’s identities by signing each other&#39;s public keys. There is no central authority, and trust is built through a network of endorsements. Each participant decides whom to trust and how much to trust them, often based on the number and strength of signatures on a key.</p>
+<ul>
+<li><strong>Structure</strong>: Decentralized user-to-user or node-to-node trust network  </li>
+<li><strong>Trust basis</strong>: Personal trust and transitive trust through key signatures  </li>
+<li><strong>Example</strong>: PGP (Pretty Good Privacy), GnuPG key exchanges</li>
+</ul>
+<p>All validations begin with a locally trusted key (a trust anchor manually accepted by the user). Trust can be transitive—if you trust Alice, and Alice trusts Bob, you might also choose to trust Bob.</p>
+<p>This model is well-suited for communities where manual trust decisions are feasible and preferred. It eliminates the need for centralized CAs, but it does not scale well and makes revocation and identity validation difficult.</p>
+<p>This trust model provides resilience and autonomy but requires users to be actively involved in trust decisions, which can be a barrier for large-scale deployment.</p>
+<h2 id="hierarchical-trust-model-htm-hierarchical-trust-model-htm-">Hierarchical Trust Model (HTM) {#hierarchical-trust-model-(htm)}</h2>
+<p>Is also known as the tree model. It is represented by a tree structure, where at the very top is the start of the trust - the root CA. Any new level of CAs added are called subordinate CA’s. Depending on the context, they are also known as the intermediate CAs.</p>
+<ul>
+<li><strong>Structure</strong>: Root CA -> Intermediate CA -> End  User  </li>
+<li><strong>Trust anchor:</strong> Root CA  </li>
+<li><strong>Example</strong>: HTTPS/TLS  Certificate</li>
+</ul>
+<p>Any intermediate CA’s trust only the uplink CA, and the trust model goes all the way to the root certificate. </p>
+<p>This is the most common trust model that can be found out there. Compared to the Single CA trust model, the hierarchical trust model is scalable. </p>
+<p>## </p>
+<h2 id="mesh-trust-model-mtm-mesh-trust-model-mtm-">Mesh Trust Model (MTM) {#mesh-trust-model-(mtm)}</h2>
+<p>Consists of multiple CAs, where each CA node trusts each other directly and equally. There is no hierarchy and this set up is also known as peer-to-peer cross certification, Each CA is autonomous in this setup.  The trust relationship  might not be unconditional. A CA can limit its trust and this can be done by specifying the limitation in the certificate it issues. </p>
+<ul>
+<li><strong>Structure</strong>: Peer to Peer trust between the CAs or Nodes  </li>
+<li><strong>Trust basis</strong>: Direct bilateral agreements  </li>
+<li><strong>Example</strong>: Federated entity in government or consortiums </li>
+</ul>
+<p>All the validations of the CA start with the local CA certificate. </p>
+<p>The application of this system can be found in systems where peer-to-peer trust is required, such as federated identity systems, blockchain  networks or multi CA PKI environment. </p>
+<p>## </p>
+<p>This trust model is easily extendable, however it is costly to maintain and complicated from a management perspective. The positive side is that there is no single point of failure. In this model, the number of trust relationships is proportional to the number of CA nodes, - what might bring scalability problems.  </p>
+<h2 id="bridge-trust-model-btm-bridge-trust-model-btm-">Bridge Trust Model (BTM) {#bridge-trust-model-(btm)}</h2>
+<p>In the bridge trust model, we have at least two (but considerably more) Root CAs that communicate with each other. The main purpose is to establish cross certification. The Bridge Trust Model is used to allow certification processes between organizations, departments or any other groups.</p>
+<ul>
+<li><strong>Structure</strong>: Multiple PKI hierarchies linked via a &quot;Bridge CA&quot;  </li>
+<li><strong>Trust Basis</strong>: Cross-certification through a bridge authority  </li>
+<li><strong>Example</strong>: U.S. Federal Bridge CA for cross-agency trust</li>
+</ul>
+<p>End entities know their paths to the BCA and they only need to determine the path from the BCA to the target entity.  </p>
+<p>This model is less complex than the mesh, but much more complex than the single CA mode. The certificates are more complex and the issue is how to distribute the certificates and the statuses.</p>
+<h2 id="hybrid-pki-model-hybrid-pki-model-">Hybrid Pki Model {#hybrid-pki-model}</h2>
+<p>As the name indicates, this model allows the mixing of any previous mentioned models.</p>
+<ul>
+<li><strong>Structure</strong>: Combines elements of hierarchical, mesh, or bridge models  </li>
+<li><strong>Trust Basis</strong>: Custom to fit system requirements  </li>
+<li><strong>Example</strong>: Global PKIs with federated elements and regional root CAs</li>
+</ul>
